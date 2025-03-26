@@ -1,7 +1,5 @@
 // This file defines a main function and a widget class `InBankForm`.
 
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:inbank_frontend/colors.dart';
 import 'package:inbank_frontend/fonts.dart';
