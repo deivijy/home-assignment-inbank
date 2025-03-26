@@ -15,7 +15,7 @@ void main() {
 
 // This widget builds the loan application form.
 class InBankForm extends StatelessWidget {
-  const InBankForm({Key? key}) : super(key: key);
+  const InBankForm({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,16 +39,13 @@ class InBankForm extends StatelessWidget {
               .copyWith(secondary: AppColors.secondaryColor)
               .copyWith(error: AppColors.errorColor),
           textSelectionTheme: TextSelectionThemeData(
-            selectionColor: AppColors.textColor.withOpacity(0.3),
+            selectionColor: AppColors.textColor.withValues(alpha: 0.3),
           )),
       home: Scaffold(
         // Center the body and set its height.
         body: Center(
-            child: Expanded(
-          child: SizedBox(
-            height: max(minHeight, bodyHeight),
+          child: SingleChildScrollView(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Show the text if the body height is greater than `minHeight`.
@@ -65,7 +62,7 @@ class InBankForm extends StatelessWidget {
               ],
             ),
           ),
-        )),
+        ),
       ),
     );
   }

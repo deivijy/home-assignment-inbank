@@ -11,11 +11,11 @@ class NationalIdTextFormField extends StatelessWidget {
   final String? Function(String?)? validator;
 
   const NationalIdTextFormField({
-    Key? key,
+    super.key,
     this.initialValue,
     this.onChanged,
     this.validator,
-  }) : super(key: key);
+  });
 
   // Builds the text form field widget with customized decoration and validation
   @override

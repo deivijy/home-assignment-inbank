@@ -5,10 +5,10 @@ import 'package:inbank_frontend/widgets/loan_form.dart';
 void main() {
   testWidgets('LoanForm displays the form and initial values',
       (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
       body: Column(
-        children: const [LoanForm()],
+        children: [LoanForm()],
       ),
     )));
     // Verify the form and initial values are displayed
@@ -24,10 +24,10 @@ void main() {
   // Test the slider behavior for loan amount
   testWidgets('LoanForm slider changes the loan amount',
       (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
       body: Column(
-        children: const [LoanForm()],
+        children: [LoanForm()],
       ),
     )));
     final Slider slider = tester.widget(find.byType(Slider).first);
@@ -44,10 +44,10 @@ void main() {
   // Test the slider behavior for loan period
   testWidgets('LoanForm slider changes the loan period',
       (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
       body: Column(
-        children: const [LoanForm()],
+        children: [LoanForm()],
       ),
     )));
     final Slider slider = tester.widget(find.byType(Slider).last);

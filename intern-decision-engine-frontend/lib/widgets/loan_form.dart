@@ -12,13 +12,13 @@ import '../colors.dart';
 
 // LoanForm is a StatefulWidget that displays a loan application form.
 class LoanForm extends StatefulWidget {
-  const LoanForm({Key? key}) : super(key: key);
+  const LoanForm({super.key});
 
   @override
-  _LoanFormState createState() => _LoanFormState();
+  LoanFormState createState() => LoanFormState();
 }
 
-class _LoanFormState extends State<LoanForm> {
+class LoanFormState extends State<LoanForm> {
   final _formKey = GlobalKey<FormState>();
   final _apiService = ApiService();
   String _nationalId = '';
@@ -61,7 +61,7 @@ class _LoanFormState extends State<LoanForm> {
     final screenWidth = MediaQuery.of(context).size.width;
     final formWidth = screenWidth / 3;
     const minWidth = 500.0;
-    return Expanded(
+    return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -185,7 +185,7 @@ class _LoanFormState extends State<LoanForm> {
             ],
           ),
         ],
-      ),
+      )
     );
   }
 }
