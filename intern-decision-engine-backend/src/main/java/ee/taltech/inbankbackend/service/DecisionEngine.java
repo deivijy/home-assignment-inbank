@@ -1,12 +1,13 @@
 package ee.taltech.inbankbackend.service;
 
 import com.github.vladislavgoltjajev.personalcode.locale.estonia.EstonianPersonalCodeValidator;
+import ee.taltech.inbankbackend.config.CountryConfig;
 import ee.taltech.inbankbackend.config.DecisionEngineConstants;
-import ee.taltech.inbankbackend.exceptions.InvalidLoanAmountException;
-import ee.taltech.inbankbackend.exceptions.InvalidLoanPeriodException;
-import ee.taltech.inbankbackend.exceptions.InvalidPersonalCodeException;
-import ee.taltech.inbankbackend.exceptions.NoValidLoanException;
+import ee.taltech.inbankbackend.exceptions.*;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.Period;
 
 /**
  * A service class that provides a method for calculating an approved loan amount and period for a customer.
@@ -18,7 +19,6 @@ public class DecisionEngine {
 
     // Used to check for the validity of the presented ID code.
     private final EstonianPersonalCodeValidator validator = new EstonianPersonalCodeValidator();
-    private int creditModifier = 0;
 
     /**
      * Calculates the maximum loan amount and period for the customer based on their ID code,
@@ -35,16 +35,16 @@ public class DecisionEngine {
      * @throws InvalidLoanPeriodException If the requested loan period is invalid
      * @throws NoValidLoanException If there is no valid loan found for the given ID code, loan amount and loan period
      */
-    public Decision calculateApprovedLoan(String personalCode, Long loanAmount, int loanPeriod)
+    public Decision calculateApprovedLoan(String personalCode, Long loanAmount, int loanPeriod, String countryCode)
             throws InvalidPersonalCodeException, InvalidLoanAmountException, InvalidLoanPeriodException,
-            NoValidLoanException {
+            NoValidLoanException, InvalidAgeException {
         try {
-            verifyInputs(personalCode, loanAmount, loanPeriod);
+            verifyInputs(personalCode, loanAmount, loanPeriod, countryCode);
         } catch (Exception e) {
             return new Decision(null, null, e.getMessage());
         }
 
-        creditModifier = getCreditModifier(personalCode);
+        int creditModifier = getCreditModifier(personalCode);
 
         if (creditModifier == 0) {
             throw new NoValidLoanException("No valid loan found!");
@@ -85,7 +85,8 @@ public class DecisionEngine {
         return switch (personalCode) {
             case "49002010976" -> DecisionEngineConstants.SEGMENT_1_CREDIT_MODIFIER;
             case "49002010987" -> DecisionEngineConstants.SEGMENT_2_CREDIT_MODIFIER;
-            case "49002010998" -> DecisionEngineConstants.SEGMENT_3_CREDIT_MODIFIER;
+            case "49002010998", "34501024327", "51501020008"  -> DecisionEngineConstants.SEGMENT_3_CREDIT_MODIFIER;
+
             default -> 0;
         };
     }
@@ -101,8 +102,8 @@ public class DecisionEngine {
      * @throws InvalidLoanAmountException If the requested loan amount is invalid
      * @throws InvalidLoanPeriodException If the requested loan period is invalid
      */
-    private void verifyInputs(String personalCode, Long loanAmount, int loanPeriod)
-            throws InvalidPersonalCodeException, InvalidLoanAmountException, InvalidLoanPeriodException {
+    private void verifyInputs(String personalCode, Long loanAmount, int loanPeriod, String countryCode)
+            throws InvalidPersonalCodeException, InvalidLoanAmountException, InvalidLoanPeriodException, InvalidAgeException {
 
         if (!validator.isValid(personalCode)) {
             throw new InvalidPersonalCodeException("Invalid personal ID code!");
@@ -116,5 +117,44 @@ public class DecisionEngine {
             throw new InvalidLoanPeriodException("Invalid loan period!");
         }
 
+        LocalDate birthDate = getBirthDate(personalCode);
+        validateAge(birthDate, countryCode);
+    }
+
+    private void validateAge(LocalDate birthDate, String countryCode) throws InvalidAgeException {
+        int ageInYears = Period.between(birthDate, LocalDate.now()).getYears();
+        CountryConfig countryConfig = DecisionEngineConstants.EXPECTED_LIFETIMES.get(countryCode);
+
+        if (ageInYears < countryConfig.getMinimumAgeInYears()) {
+            throw new InvalidAgeException("Customer is underage");
+        }
+
+        int maxAllowedAge = countryConfig.getMaximumAgeInYears() - (DecisionEngineConstants.MAXIMUM_LOAN_PERIOD / 12);
+
+        if (ageInYears > maxAllowedAge) {
+            throw new InvalidAgeException("Customer is too old");
+        }
+    }
+
+    private LocalDate getBirthDate(String personalCode) throws InvalidPersonalCodeException {
+        try {
+            int centuryAndSex = Integer.parseInt(personalCode.substring(0, 1));
+            int year = Integer.parseInt(personalCode.substring(1, 3));
+            int month = Integer.parseInt(personalCode.substring(3, 5));
+            int day = Integer.parseInt(personalCode.substring(5, 7));
+
+            int century;
+            if (centuryAndSex == 3 || centuryAndSex == 4) {
+                century = 1900;
+            } else if (centuryAndSex == 5 || centuryAndSex == 6) {
+                century = 2000;
+            } else {
+                throw new InvalidPersonalCodeException("Invalid personal ID code!");
+            }
+
+            return LocalDate.of(century + year, month, day);
+        } catch (Exception e) {
+            throw new InvalidPersonalCodeException("Invalid personal ID code!");
+        }
     }
 }

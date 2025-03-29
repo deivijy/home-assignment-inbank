@@ -15,6 +15,7 @@ void main() {
           'loanAmount': 10000,
           'loanPeriod': 12,
           'errorMessage': 'null',
+          'countryCode': 'EE'
         };
         return http.Response(jsonEncode(response), 200);
       });
@@ -23,13 +24,15 @@ void main() {
       const personalCode = '50307172740';
       const loanAmount = 10000;
       const loanPeriod = 12;
+      const countryCode = 'EE';
 
       final result = await apiService.requestLoanDecision(
-          personalCode, loanAmount, loanPeriod);
+          personalCode, loanAmount, loanPeriod, countryCode);
 
       expect(result, isA<Map<String, String>>());
       expect(result['loanAmount'], '10000');
       expect(result['loanPeriod'], '12');
+      expect(result['countryCode'], 'EE');
       expect(result['errorMessage'], '');
     });
 
@@ -38,6 +41,7 @@ void main() {
         final response = {
           'loanAmount': 'null',
           'loanPeriod': 'null',
+          'countryCode': 'null',
           'errorMessage': 'Loan application denied',
         };
         return http.Response(jsonEncode(response), 400);
@@ -48,13 +52,15 @@ void main() {
       const personalCode = '50307172740';
       const loanAmount = 50000;
       const loanPeriod = 24;
+      const countryCode = 'EE';
 
       final result = await apiService.requestLoanDecision(
-          personalCode, loanAmount, loanPeriod);
+          personalCode, loanAmount, loanPeriod, countryCode);
 
       expect(result, isA<Map<String, String>>());
       expect(result['loanAmount'], '0');
       expect(result['loanPeriod'], '0');
+      expect(result['countryCode'], '');
       expect(result['errorMessage'], 'Loan application denied');
     });
   });

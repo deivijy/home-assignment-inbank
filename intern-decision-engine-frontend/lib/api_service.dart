@@ -9,6 +9,7 @@ class ApiService {
   String responseAmount = '';
   String responsePeriod = '';
   String responseError = '';
+  String responseCountryCode = '';
   http.Client httpClient;
 
   ApiService({http.Client? client}) : httpClient = client ?? http.Client();
@@ -16,7 +17,7 @@ class ApiService {
   // requestLoanDecision sends a request to the API to get a loan decision
   // based on the provided personalCode, loanAmount, and loanPeriod.
   Future<Map<String, String>> requestLoanDecision(
-      String personalCode, int loanAmount, int loanPeriod) async {
+      String personalCode, int loanAmount, int loanPeriod, String countryCode) async {
     final response = await httpClient.post(
       Uri.parse('$_baseUrl/loan/decision'),
       headers: {'Content-Type': 'application/json'},
@@ -24,6 +25,7 @@ class ApiService {
         'personalCode': personalCode,
         'loanAmount': loanAmount,
         'loanPeriod': loanPeriod,
+        'countryCode': countryCode,
       }),
     );
 
@@ -33,12 +35,14 @@ class ApiService {
       responseAmount = responseData['loanAmount'].toString();
       responsePeriod = responseData['loanPeriod'].toString();
       responseError = responseData['errorMessage'].toString();
+      responseCountryCode = responseData['countryCode'].toString();
 
       // Return the response data as a map, handling null values if necessary
       return {
         'loanAmount': responseAmount != 'null' ? responseAmount : '0',
         'loanPeriod': responsePeriod != 'null' ? responsePeriod : '0',
         'errorMessage': responseError != 'null' ? responseError : '',
+        'countryCode': responseCountryCode != 'null' ? responseCountryCode : '',
       };
     } catch (e) {
       // An unexpected error occurred when querying the server,
